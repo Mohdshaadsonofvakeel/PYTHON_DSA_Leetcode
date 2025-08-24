@@ -1,35 +1,35 @@
-class Solution(object):
-    def findMedianSortedArrays(self, nums1, nums2):
-        """
-        :type nums1: List[int]
-        :type nums2: List[int]
-        :rtype: float
-        """
+from typing import List
+
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
         # Ensure nums1 is the smaller array
         if len(nums1) > len(nums2):
             nums1, nums2 = nums2, nums1
         
-        x, y = len(nums1), len(nums2)
-        low, high = 0, x
-
-        while low <= high:
-            partitionX = (low + high) // 2
-            partitionY = (x + y + 1) // 2 - partitionX
-
-            maxLeftX = float('-inf') if partitionX == 0 else nums1[partitionX - 1]
-            minRightX = float('inf') if partitionX == x else nums1[partitionX]
-
-            maxLeftY = float('-inf') if partitionY == 0 else nums2[partitionY - 1]
-            minRightY = float('inf') if partitionY == y else nums2[partitionY]
-
-            if maxLeftX <= minRightY and maxLeftY <= minRightX:
-                if (x + y) % 2 == 0:
-                    return (max(maxLeftX, maxLeftY) + min(minRightX, minRightY)) / 2.0
+        m, n = len(nums1), len(nums2)
+        total_left = (m + n + 1) // 2
+        
+        left, right = 0, m
+        while left <= right:
+            i = (left + right) // 2  # partition in nums1
+            j = total_left - i       # partition in nums2
+            
+            nums1_left_max  = float('-inf') if i == 0 else nums1[i - 1]
+            nums1_right_min = float('inf')  if i == m else nums1[i]
+            nums2_left_max  = float('-inf') if j == 0 else nums2[j - 1]
+            nums2_right_min = float('inf')  if j == n else nums2[j]
+            
+            if nums1_left_max <= nums2_right_min and nums2_left_max <= nums1_right_min:
+                # Found correct partition
+                if (m + n) % 2 == 1:
+                    return max(nums1_left_max, nums2_left_max)
                 else:
-                    return max(maxLeftX, maxLeftY)
-            elif maxLeftX > minRightY:
-                high = partitionX - 1
+                    return (max(nums1_left_max, nums2_left_max) + 
+                            min(nums1_right_min, nums2_right_min)) / 2
+            elif nums1_left_max > nums2_right_min:
+                right = i - 1
             else:
-                low = partitionX + 1
-
-        raise ValueError("Input arrays are not sorted or not valid")
+                left = i + 1
+        
+        # Should never reach here if inputs are valid
+        raise ValueError("Input arrays are not sorted or invalid")
